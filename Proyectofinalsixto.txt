@@ -1,0 +1,25 @@
+﻿
+public class Producto
+{
+    // ID único del producto (clave primaria en la base de datos)
+    public int IdProducto { get; set; }
+    
+    // Nombre del producto
+    public string Nombre { get; set; }
+    
+    // Código de identificación del producto
+    public string CodigoProducto { get; set; }
+    
+    // ID de la categoría a la que pertenece el producto
+    public int IdCategoria { get; set; }
+    
+    // Precio del producto
+    public decimal Precio { get; set; }
+    
+    // Cantidad de unidades disponibles en el inventario
+    public int Existencia { get; set; }
+    
+    // ID del proveedor del producto
+    public int IdProveedor { get; set; }
+}
+

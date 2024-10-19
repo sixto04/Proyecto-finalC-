@@ -1,0 +1,24 @@
+﻿
+using System.Windows.Forms;
+using System;
+
+private void btnAgregar_Click(object sender, EventArgs e)
+{
+    // Crear instancia del controlador de productos
+    ProductoController productoController = new ProductoController();
+
+    // Crear nuevo objeto Producto con los datos del formulario
+    Producto nuevoProducto = new Producto
+    {
+        Nombre = txtNombre.Text,
+        CodigoProducto = txtCodigo.Text,
+        IdCategoria = int.Parse(txtCategoria.Text),
+        Precio = decimal.Parse(txtPrecio.Text),
+        Existencia = int.Parse(txtExistencia.Text),
+        IdProveedor = int.Parse(txtProveedor.Text)
+    };
+
+    // Llamar al método para agregar el producto y mostrar un mensaje de confirmación
+    productoController.AgregarProducto(nuevoProducto);
+    MessageBox.Show("Producto agregado correctamente.");
+}

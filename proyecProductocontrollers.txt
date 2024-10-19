@@ -1,0 +1,130 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+
+// Controlador para gestionar operaciones CRUD para productos
+public class ProductoController
+{
+    // Instancia de DatabaseHelper para manejar la conexión a la base de datos
+    private DatabaseHelper dbHelper = new DatabaseHelper();
+
+    // Método para agregar un nuevo producto a la base de datos
+    public void AgregarProducto(Producto producto)
+    {
+        using (SqlConnection con = dbHelper.GetConnection())
+        {
+            // Consulta SQL para insertar un nuevo producto
+            string query = "INSERT INTO Productos (Nombre, CodigoProducto, IdCategoria, Precio, Existencia, IdProveedor) " +
+                           "VALUES (@Nombre, @CodigoProducto, @IdCategoria, @Precio, @Existencia, @IdProveedor)";
+            SqlCommand cmd = new SqlCommand(query, con);
+
+            // Asignación de parámetros para evitar inyecciones SQL
+            cmd.Parameters.AddWithValue("@Nombre", producto.Nombre);
+            cmd.Parameters.AddWithValue("@CodigoProducto", producto.CodigoProducto);
+            cmd.Parameters.AddWithValue("@IdCategoria", producto.IdCategoria);
+            cmd.Parameters.AddWithValue("@Precio", producto.Precio);
+            cmd.Parameters.AddWithValue("@Existencia", producto.Existencia);
+            cmd.Parameters.AddWithValue("@IdProveedor", producto.IdProveedor);
+
+            // Abrir la conexión, ejecutar el comando y cerrar la conexión
+            dbHelper.OpenConnection(con);
+            cmd.ExecuteNonQuery();
+            dbHelper.CloseConnection(con);
+        }
+    }
+
+    // Método para obtener todos los productos de la base de datos
+    public List<Producto> ObtenerTodosLosProductos()
+    {
+        List<Producto> productos = new List<Producto>();
+        using (SqlConnection con = dbHelper.GetConnection())
+        {
+            // Consulta SQL para seleccionar todos los productos
+            string query = "SELECT * FROM Productos";
+            SqlCommand cmd = new SqlCommand(query, con);
+            dbHelper.OpenConnection(con);
+
+            // Lectura de los resultados y creación de objetos Producto para cada registro
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                productos.Add(new Producto
+                {
+                    IdProducto = (int)reader["IdProducto"],
+                    Nombre = reader["Nombre"].ToString(),
+                    CodigoProducto = reader["CodigoProducto"].ToString(),
+                    IdCategoria = (int)reader["IdCategoria"],
+                    Precio = (decimal)reader["Precio"],
+                    Existencia = (int)reader["Existencia"],
+                    IdProveedor = (int)reader["IdProveedor"]
+                });
+            }
+            dbHelper.CloseConnection(con);
+        }
+        return productos;
+    }
+
+    // Método para actualizar la información de un producto existente
+    public void ActualizarProducto(Producto producto)
+    {
+        using (SqlConnection con = dbHelper.GetConnection())
+        {
+            // Consulta SQL para actualizar un producto
+            string query = "UPDATE Productos SET Nombre = @Nombre, CodigoProducto = @CodigoProducto, " +
+                           "IdCategoria = @IdCategoria, Precio = @Precio, Existencia = @Existencia, " +
+                           "IdProveedor = @IdProveedor WHERE IdProducto = @IdProducto";
+            SqlCommand cmd = new SqlCommand(query, con);
+
+            // Asignación de parámetros
+            cmd.Parameters.AddWithValue("@Nombre", producto.Nombre);
+            cmd.Parameters.AddWithValue("@CodigoProducto", producto.CodigoProducto);
+            cmd.Parameters.AddWithValue("@IdCategoria", producto.IdCategoria);
+            cmd.Parameters.AddWithValue("@Precio", producto.Precio);
+            cmd.Parameters.AddWithValue("@Existencia", producto.Existencia);
+            cmd.Parameters.AddWithValue("@IdProveedor", producto.IdProveedor);
+            cmd.Parameters.AddWithValue("@IdProducto", producto.IdProducto);
+
+            // Abrir la conexión, ejecutar el comando y cerrar la conexión
+            dbHelper.OpenConnection(con);
+            cmd.ExecuteNonQuery();
+            dbHelper.CloseConnection(con);
+        }
+    }
+
+    // Método para eliminar un producto de la base de datos
+    public void EliminarProducto(int idProducto)
+    {
+        using (SqlConnection con = dbHelper.GetConnection())
+        {
+            // Consulta SQL para eliminar un producto por su ID
+            string query = "DELETE FROM Productos WHERE IdProducto = @IdProducto";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@IdProducto", idProducto);
+
+            // Abrir la conexión, ejecutar el comando y cerrar la conexión
+            dbHelper.OpenConnection(con);
+            cmd.ExecuteNonQuery();
+            dbHelper.CloseConnection(con);
+        }
+        private void btnMostrarProductos_Click(object sender, EventArgs e)
+        {
+            ProductoController productoController = new ProductoController();
+            List<Producto> productos = productoController.ObtenerTodosLosProductos();
+
+            dataGridViewProductos.DataSource = productos;
+        }
+        private void btnEliminarProducto_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewProductos.SelectedRows.Count > 0)
+            {
+                int idProducto = Convert.ToInt32(dataGridViewProductos.SelectedRows[0].Cells["IdProducto"].Value);
+                ProductoController productoController = new ProductoController();
+                productoController.EliminarProducto(idProducto);
+                MessageBox.Show("Producto eliminado correctamente.");
+            }
+        }
+
+    }
+}
+
